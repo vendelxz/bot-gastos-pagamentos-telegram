@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-from config import token
+from config import TOKEN
 
 # Funções de comando
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -22,7 +22,7 @@ async def pdf(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Funcionalidade de gerar PDF ainda será implementada.")
 
 # Configuração do bot
-app = ApplicationBuilder().token(token).build()
+app = ApplicationBuilder().token(TOKEN).build()
 
 # Adiciona handlers
 app.add_handler(CommandHandler("start", start))
