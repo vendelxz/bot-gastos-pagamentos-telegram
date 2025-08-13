@@ -1,3 +1,5 @@
-#Token Acess Telegram
+from dotenv import load_dotenv
+import os
 
-token = "8375357179:AAEvLDkgUzrsTswXNxnH9k6td6EAVCPa9f4"
+load_dotenv() 
+TOKEN = os.getenv("token")
