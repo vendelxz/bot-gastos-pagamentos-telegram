@@ -11,7 +11,7 @@ if os.getenv("RUN_SERVER") == "1":
 try:
     conn = get_connection()
     conn.close()
-    print("✅ Conexão com banco Supabase estabelecida com sucesso.")
+    print("✅ Conexão com banco Neon estabelecida com sucesso.")
 except Exception as e:
     print(f"❌ Erro ao conectar no banco: {e}")
 

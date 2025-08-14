@@ -1,14 +1,18 @@
 import psycopg2
 import os
 from psycopg2.extras import RealDictCursor
+from urllib.parse import urlparse
 
 def get_connection():
+    database_url = os.getenv("DATABASE_URL")
+    result = urlparse(database_url)
     return psycopg2.connect(
-        host=os.getenv("DB_HOST"),
-        database=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("SUPABASE_PASSWORD"),
-        port=os.getenv("DB_PORT", 5432)
+        host=result.hostname,
+        database=result.path[1:],
+        user=result.username,
+        password=result.password,
+        port=result.port or 5432,
+        sslmode='require'
     )
 
 def add_usuario(telegram_id, nome):
@@ -57,12 +61,12 @@ def get_categorias():
     conn.close()
     return categorias
 
-def add_gasto(usuario_id, tipo_pagamento, cartao_id, categoria, valor):
+def add_gasto(usuario_id, tipo_pagamento, cartao_id, categoria_id, valor):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
-        "INSERT INTO gastos (usuario_id, tipo_pagamento, cartao_id, categoria, valor) VALUES (%s, %s, %s, %s, %s)",
-        (usuario_id, tipo_pagamento, cartao_id, categoria, valor)
+        "INSERT INTO gastos (usuario_id, tipo_pagamento, cartao_id, categoria_id, valor) VALUES (%s, %s, %s, %s, %s)",
+        (usuario_id, tipo_pagamento, cartao_id, categoria_id, valor)
     )
     conn.commit()
     cur.close()
@@ -74,9 +78,9 @@ def get_gastos(usuario_id, mes=None, ano=None):
     query = "SELECT * FROM gastos WHERE usuario_id = %s"
     params = [usuario_id]
     if mes and ano:
-        query += " AND EXTRACT(MONTH FROM data) = %s AND EXTRACT(YEAR FROM data) = %s"
+        query += " AND EXTRACT(MONTH FROM data_gasto) = %s AND EXTRACT(YEAR FROM data_gasto) = %s"
         params.extend([mes, ano])
-    query += " ORDER BY data DESC"
+    query += " ORDER BY data_gasto DESC"
     cur.execute(query, params)
     gastos = cur.fetchall()
     cur.close()
@@ -86,12 +90,12 @@ def get_gastos(usuario_id, mes=None, ano=None):
 def get_resumo(usuario_id, mes=None, ano=None):
     conn = get_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
-    query = "SELECT categoria, tipo_pagamento, SUM(valor) as total FROM gastos WHERE usuario_id = %s"
+    query = "SELECT categoria_id, tipo_pagamento, SUM(valor) as total FROM gastos WHERE usuario_id = %s"
     params = [usuario_id]
     if mes and ano:
-        query += " AND EXTRACT(MONTH FROM data) = %s AND EXTRACT(YEAR FROM data) = %s"
+        query += " AND EXTRACT(MONTH FROM data_gasto) = %s AND EXTRACT(YEAR FROM data_gasto) = %s"
         params.extend([mes, ano])
-    query += " GROUP BY categoria, tipo_pagamento ORDER BY categoria"
+    query += " GROUP BY categoria_id, tipo_pagamento ORDER BY categoria_id"
     cur.execute(query, params)
     resumo = cur.fetchall()
     cur.close()
