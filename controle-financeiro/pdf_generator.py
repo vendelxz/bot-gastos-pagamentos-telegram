@@ -21,10 +21,9 @@ def gerar_pdf(nome_usuario, gastos):
     data_geracao = Paragraph(f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}", styles['Normal'])
     elementos.extend([titulo, data_geracao, Spacer(1, 20)])
 
-    # Cabeçalho da tabela
     tabela_dados = [["Data", "Categoria", "Tipo de Pagamento", "Valor (R$)"]]
-
     total_geral = 0
+
     for gasto in gastos:
         data_gasto = gasto.get("data")
         if isinstance(data_gasto, datetime):
@@ -35,7 +34,6 @@ def gerar_pdf(nome_usuario, gastos):
         total_geral += valor
         tabela_dados.append([data_gasto, categoria, tipo_pagamento, f"{valor:.2f}"])
 
-    # Adiciona linha de total
     tabela_dados.append(["", "", "<b>Total</b>", f"<b>{total_geral:.2f}</b>"])
 
     tabela = Table(tabela_dados, colWidths=[80, 150, 100, 80])

@@ -1,6 +1,6 @@
-# server.py
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import threading
+import os
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -9,5 +9,6 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(b'Bot rodando!')
 
 def start_server():
-    server = HTTPServer(("0.0.0.0", 8000), SimpleHTTPRequestHandler)
+    port = int(os.getenv("PORT", 10000))  # Render define a porta em PORT
+    server = HTTPServer(("0.0.0.0", port), SimpleHTTPRequestHandler)
     threading.Thread(target=server.serve_forever, daemon=True).start()

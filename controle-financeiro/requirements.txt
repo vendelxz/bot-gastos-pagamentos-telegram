@@ -3,3 +3,4 @@ reportlab
 python-dotenv
 supabase
 psycopg2-binary
+Flask 
