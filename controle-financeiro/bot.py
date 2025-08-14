@@ -1,8 +1,9 @@
-# bot.py
+
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from config import TOKEN
 from server import start_server
+import os 
 
 # Funções de comando
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
