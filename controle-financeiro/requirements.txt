@@ -2,3 +2,4 @@ python-telegram-bot
 reportlab
 python-dotenv
 supabase
+psycopg2-binary
