@@ -3,7 +3,7 @@ from telegram.ext import ApplicationBuilder
 from config import TOKEN
 from commands import registrar_handlers
 from server import start_server
-from database import get_connection
+from db import get_connection
 
 if os.getenv("RUN_SERVER") == "1":
     start_server()
