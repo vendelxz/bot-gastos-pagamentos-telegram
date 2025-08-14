@@ -7,7 +7,7 @@ from server import start_server
 # Funções de comando
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Olá! Eu sou o MoneyControl 💰\n"
+        "Olá! Eu sou o Controlador de gastos 💰\n"
         "Comandos disponíveis:\n"
         "/gasto - registrar gasto\n"
         "/resumo - ver resumo do mês\n"
@@ -23,15 +23,16 @@ async def resumo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def pdf(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Funcionalidade de gerar PDF ainda será implementada.")
 
-# Inicia servidor HTTP em background
-start_server()
+# Inicia servidor HTTP em background caso queira
+if os.getenv("RUN_SERVER") == "1":
+    start_server()
 
-# Configuração do bot
+# Bot Telegram
 app = ApplicationBuilder().token(TOKEN).build()
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("gasto", gasto))
-app.add_handler(CommandHandler("resumo", resumo))
-app.add_handler(CommandHandler("pdf", pdf))
 
-print("Bot rodando...")
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Bot ativo!")
+
+app.add_handler(CommandHandler("start", start))
+
 app.run_polling()
