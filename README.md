@@ -30,6 +30,31 @@ Ideal para acompanhar suas finanças de forma prática, rápida e segura.
 - PDFs são gerados na pasta `pdfs` e enviados diretamente pelo Telegram.  
 
 ---
+## 📌 Pendências e Melhorias
+
+- [ ] **Geração de PDF**  
+  - Mesmo com gastos registrados, o PDF retorna "não há gastos registrados".  
+  - Corrigir a busca e leitura dos dados antes da geração.
+
+- [ ] **Cadastro de Cartões**  
+  - Cartões não estão sendo salvos no banco de dados, impedindo o processamento de gastos associados a eles.  
+  - Adicionar opção, ao cadastrar um cartão, de escolher entre já existentes ou inserir um novo.
+
+- [ ] **Resumo de Gastos**  
+  - Atualmente exibe apenas a lista de gastos.  
+  - Adicionar soma total no final do resumo.
+
+- [ ] **Organização por Mês**  
+  - Criar forma de filtrar gastos por mês.  
+  - Banco de dados poderia "esvaziar" automaticamente ao iniciar um novo mês, evitando acúmulo excessivo de dados.
+
+- [ ] **Descrição dos Gastos**  
+  - Permitir inserir uma descrição detalhada junto à categoria.  
+  - Exemplo: `Contas - "Esse é o gasto com aluguel"`.
+
+- [ ] **Forma de Pagamento (Pix)**  
+  - Adicionar opção de pagamento via Pix no cadastro de gastos.
+---
 
 ## 👤 Autor
 José Wendel
