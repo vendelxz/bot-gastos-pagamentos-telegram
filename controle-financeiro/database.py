@@ -101,3 +101,30 @@ def get_resumo(usuario_id, mes=None, ano=None):
     cur.close()
     conn.close()
     return resumo
+
+def get_gastos_para_pdf(usuario_id, mes, ano):
+    conn = get_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute(
+        """
+        SELECT 
+            g.data_gasto, 
+            c.nome AS categoria, 
+            g.tipo_pagamento, 
+            COALESCE(ca.nome, 'Dinheiro') AS cartao, 
+            g.valor
+        FROM gastos g
+        LEFT JOIN categorias c ON g.categoria_id = c.id
+        LEFT JOIN cartoes ca ON g.cartao_id = ca.id
+        WHERE g.usuario_id = %s
+          AND EXTRACT(MONTH FROM g.data_gasto) = %s
+          AND EXTRACT(YEAR FROM g.data_gasto) = %s
+        ORDER BY g.data_gasto ASC
+        """,
+        (usuario_id, mes, ano)
+    )
+    gastos = cur.fetchall()
+    cur.close()
+    conn.close()
+    return gastos if gastos else []
+

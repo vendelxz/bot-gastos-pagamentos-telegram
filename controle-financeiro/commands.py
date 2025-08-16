@@ -1,9 +1,12 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, CallbackQueryHandler, MessageHandler, CommandHandler, filters
 from database import add_usuario, get_usuario, add_gasto, get_gastos, get_resumo, get_cartoes, get_categorias, add_cartao
-from pdf_generator import gerar_pdf_mes
-from datetime import datetime
 import os
+from datetime import datetime
+from telegram import Update
+from database import get_usuario
+from pdf_generator import gerar_pdf_mes
+
 
 STATE_VALOR = "aguardando_valor"
 STATE_NOVO_CARTAO = "aguardando_novo_cartao"
@@ -101,14 +104,20 @@ async def resumo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def pdf(update: Update, context: ContextTypes.DEFAULT_TYPE):
     usuario = get_usuario(update.effective_user.id)
+    if not usuario:
+        await update.message.reply_text("Usuário não encontrado.")
+        return
+
     mes = datetime.now().month
     ano = datetime.now().year
+
     caminho = gerar_pdf_mes(usuario['id'], mes, ano)
     if not caminho:
         await update.message.reply_text("Nenhum gasto registrado para gerar PDF.")
         return
+
     with open(caminho, "rb") as file:
-        await update.message.reply_document(file)
+        await update.message.reply_document(file, filename=f"gastos_{mes}_{ano}.pdf")
 
 def registrar_handlers(app):
     app.add_handler(CommandHandler("start", start))
