@@ -111,7 +111,7 @@ async def pdf(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mes = datetime.now().month
     ano = datetime.now().year
 
-    caminho = gerar_pdf_mes(usuario['id'], mes, ano)
+    caminho = gerar_pdf_mes(update.effective_user.id, mes, ano)
     if not caminho:
         await update.message.reply_text("Nenhum gasto registrado para gerar PDF.")
         return
