@@ -20,7 +20,7 @@ Ideal para acompanhar suas finanças de forma prática, rápida e segura, sem de
 - [python-telegram-bot](https://python-telegram-bot.org/) – integração com Telegram  
 - [ReportLab](https://www.reportlab.com/) – geração de PDFs  
 - [PostgreSQL](https://www.postgresql.org/) – armazenamento de dados
-- [Docker] para rodar o Bot localmente sem a necessidade de servidor 
+- [Docker] (https://www.docker.com/) -  para rodar o Bot localmente sem a necessidade de servidor 
 
 ---
 
