@@ -112,12 +112,13 @@ async def pdf(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ano = datetime.now().year
 
     caminho = gerar_pdf_mes(update.effective_user.id, mes, ano)
-    if not caminho:
+    if caminho:
+        with open(caminho, "rb") as file:
+         await update.message.reply_document(file, filename=f"gastos_{mes}_{ano}.pdf")
+        
+    else:
         await update.message.reply_text("Nenhum gasto registrado para gerar PDF.")
         return
-
-    with open(caminho, "rb") as file:
-        await update.message.reply_document(file, filename=f"gastos_{mes}_{ano}.pdf")
 
 def registrar_handlers(app):
     app.add_handler(CommandHandler("start", start))
