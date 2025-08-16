@@ -1,8 +1,8 @@
 # MoneyControl 💰
 
-**MoneyControl** é um bot do Telegram para controle financeiro pessoal e familiar.  
-Ele permite registrar gastos por cartão ou dinheiro, organizar por categorias, gerar resumos mensais e criar PDFs detalhados com os gastos.  
-Ideal para acompanhar suas finanças de forma prática, rápida e segura.
+**MoneyControl** é um bot do Telegram para controle financeiro pessoal e familiar, desenvolvido para rodar localmente no seu computador.
+Ele permite registrar gastos por cartão ou dinheiro, organizar por categorias, gerar resumos mensais e criar PDFs detalhados com os gastos.
+Ideal para acompanhar suas finanças de forma prática, rápida e segura, sem depender de serviços na nuvem.
 
 ---
 
@@ -19,7 +19,8 @@ Ideal para acompanhar suas finanças de forma prática, rápida e segura.
 - **Python 3.12**  
 - [python-telegram-bot](https://python-telegram-bot.org/) – integração com Telegram  
 - [ReportLab](https://www.reportlab.com/) – geração de PDFs  
-- [PostgreSQL](https://www.postgresql.org/) via [Neon](https://neon.tech/) – armazenamento de dados  
+- [PostgreSQL](https://www.postgresql.org/) – armazenamento de dados
+- [Docker] para rodar o Bot localmente sem a necessidade de servidor 
 
 ---
 
