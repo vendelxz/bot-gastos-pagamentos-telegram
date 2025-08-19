@@ -32,7 +32,7 @@ Ideal para acompanhar suas finanças de forma prática, rápida e segura.
 ---
 ## 📌 Pendências e Melhorias
 
-- [ ] **Geração de PDF**  
+- [ x ] **Geração de PDF**  
   - Mesmo com gastos registrados, o PDF retorna "não há gastos registrados".  
   - Corrigir a busca e leitura dos dados antes da geração.
 
