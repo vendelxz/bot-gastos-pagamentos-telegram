@@ -70,12 +70,14 @@ def add_gasto(usuario_id, tipo_pagamento, cartao_id, categoria_id, valor):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
-        "INSERT INTO gastos (usuario_id, tipo_pagamento, cartao_id, categoria_id, valor) VALUES (%s, %s, %s, %s, %s)",
+        "INSERT INTO gastos (usuario_id, tipo_pagamento, cartao_id, categoria_id, valor) VALUES (%s, %s, %s, %s, %s) RETURNING id",
         (usuario_id, tipo_pagamento, cartao_id, categoria_id, valor)
     )
+    gasto_id = cur.fetchone()[0]
     conn.commit()
     cur.close()
     conn.close()
+    return gasto_id
 
 def get_gastos(usuario_id, mes=None, ano=None):
     conn = get_connection()

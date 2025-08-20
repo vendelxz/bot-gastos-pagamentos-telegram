@@ -23,24 +23,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/pdf - gerar PDF com gastos"
     )
 
-async def gasto(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    telegram_id = update.effective_user.id
-    usuario = get_usuario(telegram_id)
-    if not usuario:
-        await update.message.reply_text("Usuário não cadastrado.")
-        return
-    categorias = get_categorias()
-    teclado = [[InlineKeyboardButton(cat['nome'], callback_data=f"categoria|{cat['id']}")] for cat in categorias]
-    await update.message.reply_text("Escolha a categoria do gasto:", reply_markup=InlineKeyboardMarkup(teclado))
-
-async def callback_categoria(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    categoria_id = int(query.data.split("|")[1])
-    context.user_data['categoria_id'] = categoria_id
-    context.user_data['state'] = STATE_VALOR
-    await query.message.reply_text("Agora envie o valor do gasto (somente números):")
-
 async def valor_gasto(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.user_data.get('state') != STATE_VALOR:
         return
@@ -97,24 +79,14 @@ async def callback_cartao(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def novo_cartao(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.user_data.get('state') != STATE_NOVO_CARTAO:
         return
-
-    usuario = get_usuario(update.effective_user.id)
-    if not usuario:
-        await update.message.reply_text("Usuário não encontrado.")
-        context.user_data.clear()
-        return
-
     nome_cartao = update.message.text.strip()
-    if not nome_cartao:
-        await update.message.reply_text("Nome do cartão inválido. Tente novamente.")
-        return
-
+    usuario = get_usuario(update.effective_user.id)
     categoria_id = context.user_data['categoria_id']
     valor = context.user_data['valor']
-
-    cartao_id = add_cartao(usuario['id'], nome_cartao)
+    
+    cartao_id = add_cartao(usuario['id'], nome_cartao) 
     add_gasto(usuario['id'], "Cartão", cartao_id, categoria_id, valor)
-
+    
     await update.message.reply_text(f"Cartão '{nome_cartao}' adicionado e gasto registrado com R$ {valor:.2f}.")
     context.user_data.clear()
 
