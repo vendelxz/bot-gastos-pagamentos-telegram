@@ -1,12 +1,8 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, CallbackQueryHandler, MessageHandler, CommandHandler, filters
-from database import add_usuario, get_usuario, add_gasto, get_gastos, get_resumo, get_cartoes, get_categorias, add_cartao
-import os
-from datetime import datetime
-from telegram import Update
-from database import get_usuario
+from database import add_usuario, get_usuario, add_gasto, get_resumo, get_cartoes, get_categorias, add_cartao
 from pdf_generator import gerar_pdf_mes
-
+from datetime import datetime
 
 STATE_VALOR = "aguardando_valor"
 STATE_NOVO_CARTAO = "aguardando_novo_cartao"
@@ -22,6 +18,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/resumo - ver resumo do mês\n"
         "/pdf - gerar PDF com gastos"
     )
+
+async def gasto(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    telegram_id = update.effective_user.id
+    usuario = get_usuario(telegram_id)
+    if not usuario:
+        await update.message.reply_text("Usuário não cadastrado.")
+        return
+    categorias = get_categorias()
+    teclado = [[InlineKeyboardButton(cat['nome'], callback_data=f"categoria|{cat['id']}")] for cat in categorias]
+    await update.message.reply_text("Escolha a categoria do gasto:", reply_markup=InlineKeyboardMarkup(teclado))
 
 async def valor_gasto(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.user_data.get('state') != STATE_VALOR:
@@ -40,29 +46,32 @@ async def valor_gasto(update: Update, context: ContextTypes.DEFAULT_TYPE):
     teclado.append([InlineKeyboardButton("Em dinheiro", callback_data="cartao|0")])
     await update.message.reply_text("Escolha o cartão ou forma de pagamento:", reply_markup=InlineKeyboardMarkup(teclado))
 
+async def callback_categoria(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    categoria_id = int(query.data.split("|")[1])
+    context.user_data['categoria_id'] = categoria_id
+    context.user_data['state'] = STATE_VALOR
+    await query.message.reply_text("Agora envie o valor do gasto (somente números):")
+
 async def callback_cartao(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-
     usuario = get_usuario(update.effective_user.id)
     if not usuario:
         await query.message.reply_text("Usuário não encontrado.")
         return
-
     cartao_id = query.data.split("|")[1]
     categoria_id = context.user_data.get('categoria_id')
     valor = context.user_data.get('valor')
-
     if categoria_id is None or valor is None:
         await query.message.reply_text("Erro no fluxo do gasto. Por favor, reinicie o registro.")
         context.user_data.clear()
         return
-
     if cartao_id == "novo":
         context.user_data['state'] = STATE_NOVO_CARTAO
         await query.message.reply_text("Digite o nome do novo cartão:")
         return
-
     if cartao_id == "0":
         add_gasto(usuario['id'], "Dinheiro", None, categoria_id, valor)
         await query.message.reply_text(f"Gasto de R$ {valor:.2f} registrado em dinheiro.")
@@ -72,9 +81,7 @@ async def callback_cartao(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.message.reply_text(f"Gasto de R$ {valor:.2f} registrado no cartão.")
         except Exception:
             await query.message.reply_text("Erro ao registrar gasto no cartão.")
-    
     context.user_data.clear()
-
 
 async def novo_cartao(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.user_data.get('state') != STATE_NOVO_CARTAO:
@@ -83,13 +90,10 @@ async def novo_cartao(update: Update, context: ContextTypes.DEFAULT_TYPE):
     usuario = get_usuario(update.effective_user.id)
     categoria_id = context.user_data['categoria_id']
     valor = context.user_data['valor']
-    
-    cartao_id = add_cartao(usuario['id'], nome_cartao) 
+    cartao_id = add_cartao(usuario['id'], nome_cartao)
     add_gasto(usuario['id'], "Cartão", cartao_id, categoria_id, valor)
-    
     await update.message.reply_text(f"Cartão '{nome_cartao}' adicionado e gasto registrado com R$ {valor:.2f}.")
     context.user_data.clear()
-
 
 async def resumo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     usuario = get_usuario(update.effective_user.id)
@@ -109,18 +113,14 @@ async def pdf(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not usuario:
         await update.message.reply_text("Usuário não encontrado.")
         return
-
     mes = datetime.now().month
     ano = datetime.now().year
-
     caminho = gerar_pdf_mes(update.effective_user.id, mes, ano)
     if caminho:
         with open(caminho, "rb") as file:
-         await update.message.reply_document(file, filename=f"gastos_{mes}_{ano}.pdf")
-        
+            await update.message.reply_document(file, filename=f"gastos_{mes}_{ano}.pdf")
     else:
         await update.message.reply_text("Nenhum gasto registrado para gerar PDF.")
-        return
 
 def registrar_handlers(app):
     app.add_handler(CommandHandler("start", start))
