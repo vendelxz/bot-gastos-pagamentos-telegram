@@ -38,10 +38,15 @@ def get_usuario(telegram_id):
 def add_cartao(usuario_id, nome):
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("INSERT INTO cartoes (usuario_id, nome) VALUES (%s, %s)", (usuario_id, nome))
+    cur.execute(
+        "INSERT INTO cartoes (usuario_id, nome) VALUES (%s, %s) RETURNING id",
+        (usuario_id, nome)
+    )
+    cartao_id = cur.fetchone()[0]
     conn.commit()
     cur.close()
     conn.close()
+    return cartao_id
 
 def get_cartoes(usuario_id):
     conn = get_connection()

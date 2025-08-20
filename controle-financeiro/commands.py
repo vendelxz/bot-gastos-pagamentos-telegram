@@ -61,33 +61,63 @@ async def valor_gasto(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def callback_cartao(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    cartao_id = query.data.split("|")[1]
+
     usuario = get_usuario(update.effective_user.id)
-    categoria_id = context.user_data['categoria_id']
-    valor = context.user_data['valor']
+    if not usuario:
+        await query.message.reply_text("Usuário não encontrado.")
+        return
+
+    cartao_id = query.data.split("|")[1]
+    categoria_id = context.user_data.get('categoria_id')
+    valor = context.user_data.get('valor')
+
+    if categoria_id is None or valor is None:
+        await query.message.reply_text("Erro no fluxo do gasto. Por favor, reinicie o registro.")
+        context.user_data.clear()
+        return
+
     if cartao_id == "novo":
         context.user_data['state'] = STATE_NOVO_CARTAO
         await query.message.reply_text("Digite o nome do novo cartão:")
         return
+
     if cartao_id == "0":
         add_gasto(usuario['id'], "Dinheiro", None, categoria_id, valor)
         await query.message.reply_text(f"Gasto de R$ {valor:.2f} registrado em dinheiro.")
     else:
-        add_gasto(usuario['id'], "Cartão", int(cartao_id), categoria_id, valor)
-        await query.message.reply_text(f"Gasto de R$ {valor:.2f} registrado no cartão.")
+        try:
+            add_gasto(usuario['id'], "Cartão", int(cartao_id), categoria_id, valor)
+            await query.message.reply_text(f"Gasto de R$ {valor:.2f} registrado no cartão.")
+        except Exception:
+            await query.message.reply_text("Erro ao registrar gasto no cartão.")
+    
     context.user_data.clear()
+
 
 async def novo_cartao(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.user_data.get('state') != STATE_NOVO_CARTAO:
         return
-    nome_cartao = update.message.text.strip()
+
     usuario = get_usuario(update.effective_user.id)
+    if not usuario:
+        await update.message.reply_text("Usuário não encontrado.")
+        context.user_data.clear()
+        return
+
+    nome_cartao = update.message.text.strip()
+    if not nome_cartao:
+        await update.message.reply_text("Nome do cartão inválido. Tente novamente.")
+        return
+
     categoria_id = context.user_data['categoria_id']
     valor = context.user_data['valor']
-    add_cartao(usuario['id'], nome_cartao)
-    add_gasto(usuario['id'], "Cartão", None, categoria_id, valor)
+
+    cartao_id = add_cartao(usuario['id'], nome_cartao)
+    add_gasto(usuario['id'], "Cartão", cartao_id, categoria_id, valor)
+
     await update.message.reply_text(f"Cartão '{nome_cartao}' adicionado e gasto registrado com R$ {valor:.2f}.")
     context.user_data.clear()
+
 
 async def resumo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     usuario = get_usuario(update.effective_user.id)
